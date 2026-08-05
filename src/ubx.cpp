@@ -83,6 +83,7 @@ GPSDriverUBX::GPSDriverUBX(Interface gpsInterface, GPSCallbackPtr callback, void
 	_heading_offset(settings.heading_offset),
 	_uart2_baudrate(settings.uart2_baudrate),
 	_ppk_output(settings.ppk_output),
+	_raw_output(settings.raw_output),
 	_jam_det_sensitivity_hi(settings.jam_det_sensitivity_hi)
 {
 	decodeInit();
@@ -1009,6 +1010,31 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 		}
 	}
 
+	if (_raw_output) {
+		UBX_DEBUG("Configuring RAW output");
+		cfg_valset_msg_size = initCfgValset();
+
+		// Enable output protocols on UART1
+		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1OUTPROT_UBX, 1, cfg_valset_msg_size);
+
+		// Configure RAWX SFRBX SIG COMMS message outputs on UART1
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_SFRBX_UART1, 100, cfg_valset_msg_size); // SFRBX
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_RAWX_UART1, 1, cfg_valset_msg_size); // RAWX
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_COR_UART1, 50, cfg_valset_msg_size); // COR
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_SIG_UART1, 50, cfg_valset_msg_size); // SIG
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_MON_COMMS_UART1, 50, cfg_valset_msg_size); // SIG
+		// more?
+
+		if (!sendMessage(UBX_MSG_CFG_VALSET, _tx_cfg_valset_buf, cfg_valset_msg_size)) {
+			return -1;
+		}
+
+		if (waitForAck(UBX_MSG_CFG_VALSET, UBX_CONFIG_TIMEOUT, true) < 0) {
+			return -1;
+		}
+
+	}
+
 	if (_mode == UBXMode::Normal && _ppk_output) {
 		UBX_DEBUG("Configuring Normal with MSM7 output");
 		cfg_valset_msg_size = initCfgValset();
@@ -1881,6 +1907,7 @@ GPSDriverUBX::payloadRxInit()
 			uint32_t key_id = 0;
 
 			switch (_rx_msg) { // we cannot infer the config Key ID from _rx_msg for protocol version 27+
+			/* leave for RAW out
 			case UBX_MSG_RXM_RAWX:
 				key_id = UBX_CFG_KEY_MSGOUT_UBX_RXM_RAWX_I2C;
 				break;
@@ -1888,7 +1915,7 @@ GPSDriverUBX::payloadRxInit()
 			case UBX_MSG_RXM_SFRBX:
 				key_id = UBX_CFG_KEY_MSGOUT_UBX_RXM_SFRBX_I2C;
 				break;
-
+			*/
 			case UBX_MSG_NAV_TIMEGPS:
 				key_id = UBX_CFG_KEY_MSGOUT_UBX_NAV_TIMEGPS_I2C;
 				break;
