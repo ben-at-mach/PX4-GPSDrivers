@@ -81,6 +81,7 @@ GPSDriverUBX::GPSDriverUBX(Interface gpsInterface, GPSCallbackPtr callback, void
 	_output_rate(settings.output_rate),
 	_mode(settings.mode),
 	_heading_offset(settings.heading_offset),
+	_uart1_desired_baudrate(settings.uart1_desired_baudrate),
 	_uart2_baudrate(settings.uart2_baudrate),
 	_ppk_output(settings.ppk_output),
 	_raw_output(settings.raw_output),
@@ -118,7 +119,8 @@ GPSDriverUBX::configure(unsigned &baudrate, const GPSConfig &config)
 		const unsigned baudrates[] = {38400, 57600, 9600, 115200, 230400, 460800, 921600};
 
 		unsigned baud_i;
-		unsigned desired_baudrate = auto_baudrate ? UBX_BAUDRATE_M8_AND_NEWER : baudrate;
+		//unsigned desired_baudrate = auto_baudrate ? UBX_BAUDRATE_M8_AND_NEWER : baudrate; // behavior if SER_GPS1_BAUD param missing?
+		unsigned desired_baudrate = _uart1_desired_baudrate;
 
 		if ((_mode == UBXMode::RoverWithMovingBaseUART1) || (_mode == UBXMode::MovingBaseUART1)) {
 			desired_baudrate = UART1_BAUDRATE_HEADING;
@@ -1020,9 +1022,9 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 		// Configure RAWX SFRBX SIG COMMS message outputs on UART1
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_SFRBX_UART1, 100, cfg_valset_msg_size); // SFRBX
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_RAWX_UART1, 1, cfg_valset_msg_size); // RAWX
-		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_COR_UART1, 50, cfg_valset_msg_size); // COR
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_COR_UART1, 50, cfg_valset_msg_size); // Corrections
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_SIG_UART1, 50, cfg_valset_msg_size); // SIG
-		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_MON_COMMS_UART1, 50, cfg_valset_msg_size); // SIG
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_MON_COMMS_UART1, 50, cfg_valset_msg_size); // COMMS
 		// more?
 
 		if (!sendMessage(UBX_MSG_CFG_VALSET, _tx_cfg_valset_buf, cfg_valset_msg_size)) {

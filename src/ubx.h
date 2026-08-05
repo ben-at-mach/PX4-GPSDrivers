@@ -1027,6 +1027,7 @@ public:
 		int8_t min_elev;
 		uint8_t output_rate;
 		float heading_offset;
+		int32_t uart1_desired_baudrate;
 		int32_t uart2_baudrate;
 		bool ppk_output;
 		bool raw_output;
@@ -1243,6 +1244,7 @@ private:
 
 	const UBXMode _mode {};
 	const float _heading_offset {};
+	const int32_t _uart1_desired_baudrate {};
 	const int32_t _uart2_baudrate {};
 	const bool _ppk_output {};
 	const bool _raw_output {};
