@@ -1022,9 +1022,11 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 		// Configure RAWX SFRBX SIG COMMS message outputs on UART1
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_SFRBX_UART1, 100, cfg_valset_msg_size); // SFRBX
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_RAWX_UART1, 1, cfg_valset_msg_size); // RAWX
-		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_COR_UART1, 50, cfg_valset_msg_size); // Corrections
-		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_SIG_UART1, 50, cfg_valset_msg_size); // SIG
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_RXM_COR_UART1, 25, cfg_valset_msg_size); // Corrections
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_SIG_UART1, 25, cfg_valset_msg_size); // SIG
 		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_MON_COMMS_UART1, 50, cfg_valset_msg_size); // COMMS
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_MON_SPAN_UART1, 100, cfg_valset_msg_size); // SPAN
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_SBAS_UART1, 100, cfg_valset_msg_size); // SBAS
 		// more?
 
 		if (!sendMessage(UBX_MSG_CFG_VALSET, _tx_cfg_valset_buf, cfg_valset_msg_size)) {
@@ -1034,7 +1036,6 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 		if (waitForAck(UBX_MSG_CFG_VALSET, UBX_CONFIG_TIMEOUT, true) < 0) {
 			return -1;
 		}
-
 	}
 
 	if (_mode == UBXMode::Normal && _ppk_output) {
