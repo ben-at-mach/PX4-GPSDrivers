@@ -83,6 +83,8 @@ GPSDriverUBX::GPSDriverUBX(Interface gpsInterface, GPSCallbackPtr callback, void
 	_heading_offset(settings.heading_offset),
 	_uart1_desired_baudrate(settings.uart1_desired_baudrate),
 	_uart2_baudrate(settings.uart2_baudrate),
+	_rtcm_out_id(settings.rtcm_out_id),
+	_rtcm_in_id(settings.rtcm_in_id),
 	_ppk_output(settings.ppk_output),
 	_raw_output(settings.raw_output),
 	_jam_det_sensitivity_hi(settings.jam_det_sensitivity_hi)
@@ -1010,6 +1012,27 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 				(void)waitForAck(UBX_MSG_CFG_VALSET, UBX_CONFIG_TIMEOUT, false);
 			}
 		}
+	}
+
+	// set RTCM ID in/out/filter
+	UBX_DEBUG("Configuring RTCM ID in/out");
+	cfg_valset_msg_size = initCfgValset();
+	cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1OUTPROT_UBX, 1, cfg_valset_msg_size);
+	cfgValset<uint8_t>(UBX_CFG_RTCM_DF003_OUT, _rtcm_out_id, cfg_valset_msg_size); // ID out
+	if (_rtcm_in_id == 0)
+	{
+		cfgValset<uint8_t>(UBX_CFG_RTCM_DF003_IN_FILTER, false, cfg_valset_msg_size); // Turn off ID filtering
+	} else {
+		cfgValset<uint8_t>(UBX_CFG_RTCM_DF003_IN, _rtcm_in_id, cfg_valset_msg_size); // ID in
+		cfgValset<uint8_t>(UBX_CFG_RTCM_DF003_IN_FILTER, true, cfg_valset_msg_size); // Turn off ID filtering
+	}
+
+	if (!sendMessage(UBX_MSG_CFG_VALSET, _tx_cfg_valset_buf, cfg_valset_msg_size)) {
+		return -1;
+	}
+
+	if (waitForAck(UBX_MSG_CFG_VALSET, UBX_CONFIG_TIMEOUT, true) < 0) {
+		return -1;
 	}
 
 	if (_raw_output) {

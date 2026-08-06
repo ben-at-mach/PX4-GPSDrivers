@@ -367,6 +367,9 @@
 #define UBX_CFG_KEY_TMODE_SVIN_MIN_DUR          0x40030010
 #define UBX_CFG_KEY_TMODE_SVIN_ACC_LIMIT        0x40030011
 
+#define UBX_CFG_RTCM_DF003_OUT        		0x30090001  // U2  RTCM output reference station ID
+#define UBX_CFG_RTCM_DF003_IN         		0x30090008  // U2  RTCM input reference station ID to match
+#define UBX_CFG_RTCM_DF003_IN_FILTER  		0x20090009  // E1  Enable/disable filtering incoming RTCM by DF003_IN
 
 #define UBX_CFG_KEY_MSGOUT_UBX_MON_RF_I2C        0x20910359
 #define UBX_CFG_KEY_MSGOUT_UBX_NAV_SVIN_I2C      0x20910088
@@ -1030,6 +1033,8 @@ public:
 		float heading_offset;
 		int32_t uart1_desired_baudrate;
 		int32_t uart2_baudrate;
+		int32_t rtcm_out_id;
+		int32_t rtcm_in_id;
 		bool ppk_output;
 		bool raw_output;
 		bool jam_det_sensitivity_hi;
@@ -1247,6 +1252,8 @@ private:
 	const float _heading_offset {};
 	const int32_t _uart1_desired_baudrate {};
 	const int32_t _uart2_baudrate {};
+	const int32_t _rtcm_out_id {};
+	const int32_t _rtcm_in_id {};
 	const bool _ppk_output {};
 	const bool _raw_output {};
 	const bool _jam_det_sensitivity_hi {};
