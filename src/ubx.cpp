@@ -1014,7 +1014,10 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 		}
 	}
 
-	// set RTCM ID in/out/filter
+	// Set RTCM ID in/out/filter
+	// Should heading/relpos be simpler and more flexible?
+	//   If out ID !=0, then set MSM7 out
+	//   If in ID !=0, then turn on NAV_RELPOSNED
 	UBX_DEBUG("Configuring RTCM ID in/out");
 	cfg_valset_msg_size = initCfgValset();
 	cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1OUTPROT_UBX, 1, cfg_valset_msg_size);
@@ -1164,13 +1167,14 @@ int GPSDriverUBX::configureDevice(const GPSConfig &config, const int32_t uart2_b
 
 	} else if (_mode == UBXMode::RoverWithMovingBaseUART1) {
 		UBX_DEBUG("Configuring UART1 for rover");
-		// heading output period 1 second
+		// heading output period 1 second //why?
 		cfg_valset_msg_size = initCfgValset();
 		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1INPROT_UBX, 1, cfg_valset_msg_size);
 		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1INPROT_RTCM3X, 1, cfg_valset_msg_size);
 		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1INPROT_NMEA, 0, cfg_valset_msg_size);
 		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1OUTPROT_UBX, 1, cfg_valset_msg_size);
 		cfgValset<uint8_t>(UBX_CFG_KEY_CFG_UART1OUTPROT_RTCM3X, 0, cfg_valset_msg_size);
+		cfgValset<uint8_t>(UBX_CFG_KEY_MSGOUT_UBX_NAV_RELPOSNED_UART1,1,cfg_valset_msg_size);
 
 		if (!sendMessage(UBX_MSG_CFG_VALSET, _tx_cfg_valset_buf, cfg_valset_msg_size)) {
 			return -1;
